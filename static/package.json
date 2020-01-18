@@ -31,12 +31,15 @@
   "dependencies": {
     "@babel/plugin-proposal-object-rest-spread": "^7.3.1",
     "@babel/polyfill": "^7.2.5",
+    "chokidar": "^3.3.1",
     "electron-prebuilt": "^1.4.13",
     "electron-reload": "^1.5.0",
     "parcel-bundler": "^1.11.0",
     "parcel-plugin-compress": "^1.0.9",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-animations": "^1.0.0",
+    "react-dom": "^16.12.0",
+    "react-transition-group": "^4.3.0"
   },
   "compress": {
     "gzip": {

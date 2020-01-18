@@ -2,9 +2,11 @@
 
 
 const {app, BrowserWindow} = require('electron');
-
-// require('electron-reload')(__dirname);
-
+//
+// require('electron-reload')(__dirname, {
+//   electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
+//   hardResetMethod: 'exit'
+// });
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -12,7 +14,7 @@ let mainWindow;
 
 function createWindow() {
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 1024, height: 800});
+    mainWindow = new BrowserWindow({width: 1024, height: 800, titleBarStyle: 'hidden'});
 
     // and load the index.html of the app.
     mainWindow.loadURL('http://127.0.0.1:4242/');

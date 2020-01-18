@@ -31935,20 +31935,118 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var App =
+var Header =
 /*#__PURE__*/
 function (_Component) {
-  (0, _inherits2.default)(App, _Component);
+  (0, _inherits2.default)(Header, _Component);
 
-  function App() {
+  function Header() {
+    (0, _classCallCheck2.default)(this, Header);
+    return (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(Header).apply(this, arguments));
+  }
+
+  (0, _createClass2.default)(Header, [{
+    key: "render",
+    value: function render() {
+      return _react.default.createElement("div", {
+        id: "header"
+      }, "Apexio");
+    }
+  }]);
+  return Header;
+}(_react.Component);
+
+var App =
+/*#__PURE__*/
+function (_Component2) {
+  (0, _inherits2.default)(App, _Component2);
+
+  function App(props) {
+    var _this;
+
     (0, _classCallCheck2.default)(this, App);
-    return (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(App).apply(this, arguments));
+    _this = (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(App).call(this, props));
+
+    _this.changeLoading = function () {
+      _this.setState({
+        loading: false
+      });
+    };
+
+    _this.state = {
+      loading: true
+    };
+    return _this;
   }
 
   (0, _createClass2.default)(App, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      setTimeout(this.changeLoading, 3000);
+    }
+  }, {
     key: "render",
     value: function render() {
-      return _react.default.createElement("div", null, "hello world");
+      var animatedDiv = _react.default.createElement("div", {
+        key: "loading",
+        id: "mainLogoLoading",
+        className: "animated animatedFadeInUp fadeInUp"
+      }, _react.default.createElement("img", {
+        src: "/static/logo.png",
+        alt: ""
+      }), " ", _react.default.createElement("br", null), _react.default.createElement("em", null, "Declutter your life"));
+
+      if (!this.state.loading) {
+        animatedDiv = _react.default.createElement("div", {
+          key: "mainDiv",
+          className: "animated animatedFadeInUp fadeInUp"
+        }, _react.default.createElement("div", {
+          id: "welcomeAnimation"
+        }, "Welcome to", _react.default.createElement("br", null), " ", _react.default.createElement("span", {
+          id: "welcomeSpan"
+        }, "Apexio")), _react.default.createElement("div", {
+          className: "parent"
+        }, _react.default.createElement("div", {
+          className: "left"
+        }, _react.default.createElement("img", {
+          className: "miniLogo",
+          src: "/static/folders.png"
+        })), _react.default.createElement("div", {
+          className: "right"
+        }, _react.default.createElement("span", {
+          className: "miniLogoTitle"
+        }, "Easy organization"), _react.default.createElement("br", null), " Quick AI powered organization")), _react.default.createElement("br", null), _react.default.createElement("div", {
+          className: "parent"
+        }, _react.default.createElement("div", {
+          className: "left"
+        }, _react.default.createElement("img", {
+          className: "miniLogo",
+          src: "/static/privacy.png",
+          alt: ""
+        })), _react.default.createElement("div", {
+          className: "right"
+        }, _react.default.createElement("span", {
+          className: "miniLogoTitle"
+        }, "Secure and private "), _react.default.createElement("br", null), " Everything is offline and encrypted")), _react.default.createElement("br", null), _react.default.createElement("div", {
+          className: "parent"
+        }, _react.default.createElement("div", {
+          className: "left"
+        }, _react.default.createElement("img", {
+          className: "miniLogo",
+          src: "/static/configurable.png",
+          alt: ""
+        })), _react.default.createElement("div", {
+          className: "right"
+        }, _react.default.createElement("span", {
+          className: "miniLogoTitle"
+        }, "Configurability and Control"), " ", _react.default.createElement("br", null), " Specify rules manually or Automatically")), _react.default.createElement("button", {
+          className: "mainButtonStyle"
+        }, "Continue\xA0\xA0", _react.default.createElement("i", {
+          className: "fa fa-arrow-right rightArrow"
+        })));
+      }
+
+      return _react.default.createElement("div", null, _react.default.createElement(Header, null), animatedDiv);
     }
   }]);
   return App;
@@ -31996,7 +32094,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56042" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49857" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
