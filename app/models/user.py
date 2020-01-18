@@ -51,3 +51,4 @@ def removeExtension(fileNameString):
             last = i
             break
     return fileNameString[:len(fileNameString) - last - 1]
+
