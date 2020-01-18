@@ -1,0 +1,9 @@
+*.db
+.idea/
+.vscode/
+*.pyc
+.DS_STORE
+node_modules/
+venv/
+.cache/
+*.map
