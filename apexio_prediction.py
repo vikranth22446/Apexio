@@ -198,11 +198,14 @@ def main():
 	with open('automated_directory_settings.json') as json_file:
 		data = json.load(json_file)
 		for p in data:
-			dir_triples.append((p['Path'],p['Name'],p['Model_Location']))
-			model = load_model(p['Model_Location'])
-			preds = model.predict(np.array(vecs))
-			for i in range(len(preds)):
-				predictions[i].append(preds[i][0])
+			try:
+				model = load_model(p['Model_Location'])
+				dir_triples.append((p['Path'],p['Name'],p['Model_Location']))
+				preds = model.predict(np.array(vecs))
+				for i in range(len(preds)):
+					predictions[i].append(preds[i][0])
+			except:
+				pass
 
 	recommendations = []
 	print('Recommendations')
