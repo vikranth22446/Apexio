@@ -9,6 +9,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Popup from "reactjs-popup";
+import {Checkbox, TextField, Button} from '@material-ui/core';
+
 
 const useStyles = makeStyles({
     table: {
@@ -31,9 +34,20 @@ const rows = [
     createData('Gingerbread', 356, 16.0, 49, 3.9),
 ];
 
-function DenseTable() {
-    const classes = useStyles();
+function onDelete(props, id) {
+    fetch('http://127.0.0.1:4242/delete_rule', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({id: id})
+    });
+    props.reloadData();
+}
 
+function DenseTable(props) {
+    const classes = useStyles();
     return (
         <TableContainer component={Paper}>
             <Table className={classes.table} size="small" aria-label="a dense table">
@@ -45,20 +59,19 @@ function DenseTable() {
                         <TableCell>Extension</TableCell>
                         <TableCell>Regex</TableCell>
                         <TableCell>Move to</TableCell>
+                        <TableCell>Delete Row</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {props.rows.map(row => (
-                        <TableRow key={row.name}>
-                            <TableCell component="th" scope="row">
-                                {row.name}
-                            </TableCell>
+                        <TableRow key={row.id}>
                             <TableCell>{row.has}</TableCell>
                             <TableCell>{row.equals}</TableCell>
                             <TableCell> {row.begins_with}</TableCell>
                             <TableCell>{row.extension}</TableCell>
                             <TableCell>{row.regex}</TableCell>
-                            <TableCell>{row.moveTo}</TableCell>
+                            <TableCell>{row.move_to}</TableCell>
+                            <TableCell><Button onClick={() => onDelete(props, row.id)}>Delete</Button></TableCell>
 
                         </TableRow>
                     ))}
@@ -68,6 +81,94 @@ function DenseTable() {
     );
 }
 
+class CreateNewDataForm extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    handleHas = (event) => {
+        this.setState({has: event.target.value});
+    }
+
+    handleEquals = (event) => {
+        this.setState({equals: event.target.value});
+    }
+    handleBeginsWith = (event) => {
+        this.setState({begins_with: event.target.value})
+    }
+
+    handleSubmit = (event) => {
+        //Make a network call somewhere
+        fetch('http://127.0.0.1:4242/create_rule', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.state)
+        });
+        this.props.reloadData();
+        this.props.closeModal();
+    };
+
+    handleExtension = (event) => {
+        this.setState({extension: event.target.value})
+    };
+
+    handleDeleteValue = (event) => {
+        this.setState({delete_file: event.target.value});
+    };
+    handleRegex = (event) => {
+        this.setState({regex: event.target.value});
+    };
+
+    handleDirChange = (event) => {
+        this.setState({move_to: event.target.value})
+    }
+
+    render() {
+
+        return <div className={"createNewDataForm"}>
+            <form onSubmit={this.handleSubmit}>
+                Filter the following details: <br/>
+                Leave fields that are unneeded empty
+                <br/>
+                <TextField name={"has"} label="HAS:" onChange={this.handleHas}/>
+                <br/>
+                <TextField name={"equals"} label="Equals: " onChange={this.handleEquals}/>
+                <br/>
+                <TextField name={"begins_with"} label="Begins With: "
+                           onChange={this.handleBeginsWith}/>
+                <br/>
+                <TextField name={"regex"} label="Regex: "
+                           onChange={this.handleRegex}/>
+                <br/>
+                <TextField name={"extension"} label="Extension" onChange={this.handleExtension}/>
+                <br/>
+                Delete File: <Checkbox name={"delete_file"} onChange={this.handleDeleteValue}/>
+                <br/>
+                Move File To Dir: <input directory="" webkitdirectory="" type="file" name={"move_to"}
+                                         onChange={this.handleDirChange}/>
+
+                <Button onClick={this.handleSubmit}> Create New Filter </Button>
+            </form>
+        </div>
+    }
+}
+
+const PopupExample = ({reloadData}) => (
+    <Popup trigger={
+        <Button style={{color: 'white'}} variant="contained" color="primary">Crew New Filter</Button>
+    } modal
+           closeOnDocumentClick
+    >{close => (
+
+        <div id={"dataForm"}>
+            <CreateNewDataForm reloadData={() => reloadData()} closeModal={() => close()}/>
+        </div>)}
+    </Popup>
+);
 
 class Rules extends Component {
     constructor(props) {
@@ -78,28 +179,42 @@ class Rules extends Component {
         }
     }
 
-    componentDidMount() {
+    reloadData() {
 
-        fetch('http://127.0.0.1:4242/get_all_rules').
-        then(response => response.json())
+        fetch('http://127.0.0.1:4242/get_all_rules').then(response => response.json())
             .then((jsonData) => {
                 // jsonData is parsed json object received from url
                 // console.log(jsonData);
-                this.setState({rows: jsonData['rows']})
+                this.setState({rows: jsonData['rules']})
             })
             .catch((error) => {
                 // handle your errors here
                 console.error(error)
-            })
+            });
+
+
+    }
+
+    componentDidMount() {
+        this.intervalId = setInterval(() => this.reloadData(), 5000);
+        // this.reloadData();
+    }
+
+    componentWillUnmount() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
     }
 
     render() {
         return (
             <div>
                 <Header/>
-                Rules:
+
+                <h2>Filter Rules: <PopupExample reloadData={() => this.reloadData()}/></h2>
+                <br/>
                 <div style={{marginRight: "30px", marginLeft: "30px"}}>
-                    <DenseTable rows={this.state.rows}/>
+                    <DenseTable rows={this.state.rows} reloadData={() => this.reloadData()}/>
                 </div>
             </div>
         );

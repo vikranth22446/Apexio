@@ -17,7 +17,7 @@ def home(path=None):
     return render_template('index.html')
 
 
-@main.route("/create_rule", methods=["POST"])
+@main.route("/create_rule", methods=["POST", "GET"])
 def create_rule():
     """
     Catch all home view used to render the react code. This is rendered server side to allow
@@ -48,20 +48,24 @@ def create_rule():
     return jsonify({"status": 200}), 200
 
 
-@main.route("/get_all_rules", methods=["POST"])
+@main.route("/delete_rule", methods=["POST", "GET"])
+def delete_rule():
+    data = request.get_json()
+    id = data.get("id", -1)
+    rule = Rules.query.get(id)
+    if rule:
+        db.session.delete(rule)
+        db.session.commit()
+    return jsonify({"status": 200})
+
+
+@main.route("/get_all_rules", methods=["GET"])
 def get_all_rules():
     """
     Catch all home view used to render the react code. This is rendered server side to allow
     for other configurations such as csrf tokens, etc.
     :return: the rendered template
     """
-    # - Has
-    # - Is
-    # - Begins with
-    # - Extension
-    # - Regex
-    # - Delete After
-    # - Move to
 
     rules = Rules.query.all()
     rules_dic = []
@@ -69,11 +73,4 @@ def get_all_rules():
         data = rule.get_json()
         rules_dic.append(data)
 
-    # data = request.get_json()
-    # rule_type = data.get("RuleType", "")
-    # content = data.get("Content")
-    # rule = Rules(rule_type=rule_type, content=content)
-    # db.session.add(rule)
-    # db.session.commit()
-    # return jsonify({"status": 200}), 200
     return jsonify({"rules": rules_dic})

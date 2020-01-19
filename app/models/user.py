@@ -40,7 +40,8 @@ class Rules(db.Model):
             "begins_with": self.begins_with,
             "extension": self.extension,
             "delete_file": self.delete_file,
-            "move_to": self.move_to
+            "move_to": self.move_to,
+            "regex": self.regex
         }
 
 

@@ -27,16 +27,19 @@ def create_app(config_name=None, db_ref=None) -> Flask:
     else:
         db_ref.init_app(app)
         db_ref.reflect(app=app)
-
     configure_blueprints(app, app_config)
     configure_hook(app, config)
     configure_error_handlers(app)
+
+    with app.app_context():
+        db.create_all()
     return app
 
 
 def configure_blueprints(flask_app: Flask, config: Config):
     from app.main import main
     flask_app.register_blueprint(main)
+    from app.models.user import Rules
 
 
 def configure_hook(app, config):
