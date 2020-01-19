@@ -119,7 +119,7 @@ def extract(file_path):
 def get_file(path, model):
 	try:
 		extr = extract(path)
-		return [path, 'NAN', 'NAN', get_doc2vec(extr)]
+		return [path, 'NAN', 'NAN', get_doc2vec(extr, model)]
 	except:
 		return [path, 'NAN', 'NAN', None]
 	return None
@@ -171,7 +171,7 @@ def make_predictions(dir_triples, file_paths, model):
 	vecs = []
 	for path in file_paths:
 		cont = get_file(path, model)
-		if cont[3] == None:
+		if cont[3] is None:
 			file_contents_null.append(cont)
 		else:
 			file_contents_non_null.append(cont)
@@ -180,12 +180,12 @@ def make_predictions(dir_triples, file_paths, model):
 	predictions = [[] for _ in range(len(file_contents_non_null))]
 	for triple in dir_triples:
 		try:
-			model = generate_model()
-			model.load_weights(triple[2])
-			preds = model.predict(np.array(vecs))
+			mode = generate_model()
+			mode.load_weights(triple[2])
+			preds = mode.predict(np.array(vecs))
 			for i in range(len(preds)):
 				predictions[i].append(preds[i][0])
-		except:
+		except Exception as error:
 			for i in range(len(vecs)):
 				predictions[i].append(-1)
 
@@ -196,5 +196,5 @@ def make_predictions(dir_triples, file_paths, model):
 		recommendations.append((file[0], None))
 	for i in range(len(file_contents_non_null)):
 		#print(file_contents_non_null[i][0],':',dir_triples[argmax(predictions[i])][1])
-		recommendations.append((file_contents_non_null[i][0],dir_triples[argmax(predictions[i])][1]))
+		recommendations.append((file_contents_non_null[i][0],dir_triples[np.argmax(predictions[i])][1]))
 	return recommendations

@@ -18,8 +18,7 @@ dir_triples = [
 	('./TestTargets/Science', 'Science', './models/Science_model.h5'),
 	('./TestTargets/WesternCiv', 'WesternCiv', './models/WesternCiv_model.h5'),
 ]
-model_locs = generate_models(dir_triples, model)
-
+#model_locs = generate_models(dir_triples, model)
 
 recs = make_predictions(dir_triples, files, model)
 
