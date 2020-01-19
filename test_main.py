@@ -13,24 +13,14 @@ files = grab_files('./TestSources/')
 
 model = generate_Infersent_model()
 dir_triples = [
-	('./TestTargets/AMS', 'AMS'),
-	('./TestTargets/CollegeApps', 'CollegeApps'),
-	('./TestTargets/Core1', 'Core1'),
-	('./TestTargets/Crown92', 'Crown92'),
-	('./TestTargets/CS70', 'CS70'),
-	('./TestTargets/English', 'English'),
-	('./TestTargets/History', 'History'),
-	('./TestTargets/Science', 'Science'),
-	('./TestTargets/WesternCiv', 'WesternCiv'),
-	('./TestTargets/Writing2', 'Writing2')
+	('./TestTargets/AMS', 'AMS', './models/AMS_model.h5'),
+	('./TestTargets/English', 'English', './models/English_model.h5'),
+	('./TestTargets/Science', 'Science', './models/Science_model.h5'),
+	('./TestTargets/WesternCiv', 'WesternCiv', './models/WesternCiv_model.h5'),
 ]
 model_locs = generate_models(dir_triples, model)
-new_triples = []
-for i in range(len(model_locs)):
-	tri = dir_triples[i]
-	new_triples.append((tri[0],tri[1],model_locs[i]))
 
 
-recs = make_predictions(new_triples, files)
+recs = make_predictions(dir_triples, files, model)
 
 print(recs)

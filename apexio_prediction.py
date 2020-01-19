@@ -117,8 +117,6 @@ def extract(file_path):
     return text.decode('utf-8')
 
 def get_file(path, model):
-	r = f.split(r'/'+dir+'/')[1]
-	ext = r.split(r'.')[1]
 	try:
 		extr = extract(path)
 		return [path, 'NAN', 'NAN', get_doc2vec(extr)]
@@ -126,8 +124,20 @@ def get_file(path, model):
 		return [path, 'NAN', 'NAN', None]
 	return None
 
+def generate_model():
+	input_1 = Input((4096,), dtype=tf.float32)
+	reduce_dim_1 = Dense(2000, activation='relu')(input_1)
+	x_1 = Dense(1000, activation='relu')(reduce_dim_1)
+	x_2 = Dense(500, activation='relu')(x_1)
+	x_3 = Dense(100, activation='relu')(x_2)
+	x_4 = Dense(25, activation='relu')(x_3)
+	out = Dense(1, activation='sigmoid')(x_4)
+	dual_model = Model(inputs=input_1, outputs=out)
+	dual_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+	return dual_model
+
 # ('Path','id','Model_Location')
-def make_predictions(dir_triples, file_paths, model_1):
+def make_predictions(dir_triples, file_paths, model):
 
 	nltk.download('punkt')
 
@@ -156,9 +166,6 @@ def make_predictions(dir_triples, file_paths, model_1):
 
 	#model.build_vocab_k_words(K=100000)
 
-	parser = argparse.ArgumentParser(description='Assignment 4')
-	parser.add_argument('-paths', dest="paths", action="store", help='Comma seperated list of file paths for predictions.', default='', required=True)
-
 	file_contents_non_null = []
 	file_contents_null = []
 	vecs = []
@@ -170,15 +177,16 @@ def make_predictions(dir_triples, file_paths, model_1):
 			file_contents_non_null.append(cont)
 			vecs.append(cont[3])
 
-	predictions = [[] for _ in len(file_contents_non_null)]
+	predictions = [[] for _ in range(len(file_contents_non_null))]
 	for triple in dir_triples:
 		try:
-			model = load_model(triple[2])
+			model = generate_model()
+			model.load_weights(triple[2])
 			preds = model.predict(np.array(vecs))
 			for i in range(len(preds)):
 				predictions[i].append(preds[i][0])
 		except:
-			for i in range(len(preds)):
+			for i in range(len(vecs)):
 				predictions[i].append(-1)
 
 	recommendations = []

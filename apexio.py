@@ -68,8 +68,8 @@ def generate_X_y_for_dir(dat, dir_name):
 	X = []
 	y = []
 	for i in range(len(dat)):
-			X[0].append(dat[i][3])
-			y.append(1.0 if dat[i][4] == dir_name else 0)
+		X.append(dat[i][3])
+		y.append(1.0 if dat[i][4] == dir_name else 0)
 	return np.array(X), np.array(y)
 
 def get_dirs(path):
@@ -168,7 +168,8 @@ def generate_models(dir_tuples, model):
 		X, y = generate_X_y_for_dir(file_5s, tup[1])
 		m = generate_model()
 		m.fit(X, y, epochs=10, verbose=0)
-		model_location = f'models/{tup[1]}_model.pickle'
+		model_location = f'models/{tup[1]}_model.h5'
 		model_locs.append(model_location)
 		# Immediately saves model after training
-		m.save(model_location)
+		m.save_weights(model_location)
+	return model_locs
