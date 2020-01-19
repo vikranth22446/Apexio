@@ -24,6 +24,7 @@ import json
 from random import randint
 from tensorflow.keras.layers import Input, Dense, Add, Dropout, Concatenate
 from tensorflow.keras.models import Model
+from tensorflow.keras.models import load_model
 from models import InferSent
 
 nltk.download('punkt')
@@ -166,33 +167,48 @@ def get_files(path, dir):
 			print(f'File {r} not readable')
 	return tarr
 
-def main():
+def get_file(path):
+	r = f.split(r'/'+dir+'/')[1]
+	ext = r.split(r'.')[1]
+	try:
+		extr = extract(path)
+		return [path, 'NAN', 'NAN', get_doc2vec(extr)]
+	except:
+		return [path, 'NAN', 'NAN', None]
+	return None
 
-	# Fill with tuples of format (Directory_path, Directory_name) from user settings in application. For the automated folders.
-	dir_tuples = []
+def main():
+	parser = argparse.ArgumentParser(description='Assignment 4')
+	parser.add_argument('-paths', dest="paths", action="store", help='Comma seperated list of file paths for predictions.', default='', required=True)
+
+	file_paths = parser.paths.split(',')
+	file_contents_non_null = []
+	file_contents_null = []
+	vecs = []
+	for path in file_paths:
+		cont = get_file(path)
+		if cont[3] == None:
+			file_contents_null.append(cont)
+		else:
+			file_contents_non_null.append(cont)
+			vecs.append(cont[3])
+
+	dir_triples = []
+	predictions = [[] for _ in len(file_contents_non_null)]
 	with open('automated_directory_settings.json') as json_file:
 		data = json.load(json_file)
 		for p in data:
-			dir_tuples.append((p['Path'],p['Name']))
+			dir_triples.append((p['Path'],p['Name'],p['Model_Location']))
+			model = load_model(p['Model_Location'])
+			preds = model.predict(np.array(vecs))
+			for i in range(len(preds)):
+				predictions[i].append(preds[i][0])
 
-	file_5s = []
-	for tup in dir_tuples:
-		print('Loading files from:', tup[1])
-		file_5s += get_files(tup[0], tup[1])
-	model_locs = []
-	for tup in dir_tuples:
-		print('Creating model for', tup[1])
-		X, y = generate_X_y_for_dir(file_5s, tup[1])
-		m = generate_model()
-		m.fit(X, y, epochs=10)
-		model_location = f'models/{tup[1]}_model.pickle'
-		model_locs.append(model_location)
-		# Immediately saves model after training
-		m.save(model_location)
-
-	triples = []
-	for i in range(len(dir_tuples)):
-		triples.append({'Path':dir_tuples[i][0], 'Name':dir_tuples[i][1], 'Model_Location':model_locs[i]})
-
-	with open('automated_directory_settings.json', 'w') as outfile:
-    	json.dump(triples, outfile)
+	recommendations = []
+	print('Recommendations')
+	for file in file_contents_null:
+		print(file[0], ': None')
+		recommendations.append((file[0], 'None'))
+	for i in range(len(file_contents_non_null)):
+		print(file_contents_non_null[i][0],':',dir_triples[argmax(predictions[i])][1])
+		recommendations.append((file_contents_non_null[i][0],dir_triples[argmax(predictions[i])][1]))
