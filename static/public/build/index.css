@@ -39,6 +39,7 @@
 
 .left {
     display: inline-block;
+    padding-top: 16px;
     /*vertical-align: middle;*/
     vertical-align: text-top;
 }
@@ -47,7 +48,7 @@
     display: inline-block;
     /*vertical-align: middle;*/
     vertical-align: text-top;
-    padding-top: 8px;
+    padding-top: 16px;
     width: 240px;
     wrap-option: nowrap;
     text-align: left;
@@ -67,13 +68,49 @@
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-    margin: 32px auto 0;
-    display: block;
+    margin: 16px auto 0;
     cursor: pointer;
+    display: block;
+    /*display: table-cell;*/
 }
 
 .rightArrow {
     float: right;
+}
+
+
+.mainHorizontalButtons {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    margin-left: 16px;
+    vertical-align: middle;
+    margin-right: 16px;
+    margin-top: 10%;
+
+}
+
+.third {
+    vertical-align: middle;
+    text-align: center;
+}
+
+
+.menuMainIcon {
+    width: 100px;
+    height: 100px;
+    round-clip: 1px;
+}
+
+.mainIconText {
+    width: 200px;
+    /*height: 40px;*/
+}
+
+.leftHomeIcon {
+    float: left;
+    margin-left: 16px;
+    font-size: 16px;
 }
 
 /*.parent > div {*/
@@ -114,9 +151,9 @@ body {
 
 
 .animated {
-    animation-duration: 3s;
+    animation-duration: 1.5s;
     animation-fill-mode: both;
-    -webkit-animation-duration: 3s;
+    -webkit-animation-duration: 1.5s;
     -webkit-animation-fill-mode: both
 }
 

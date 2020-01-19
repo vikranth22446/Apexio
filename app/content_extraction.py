@@ -1,3 +1,4 @@
+import os
 import re
 import textract
 
@@ -12,6 +13,8 @@ def clean_extract(mystring):
 
 
 if __name__ == '__main__':
+    for item in os.listdir('/Users/vikranth/Documents'):
+        pass
     # pdf_data = extract_pdf('/Users/vikranth/Downloads/output-1.pdf')
     # clean_extract(pdf_data)
     print(extract(''))

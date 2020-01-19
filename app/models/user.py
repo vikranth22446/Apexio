@@ -2,32 +2,46 @@
 User based models such as Users, Friends, Followers, UserRole.
 """
 # coding=utf-8
+import string
+import re
 
 from app import db
-from app.utils.base_model import Model
-
-
-class User(Model):
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String, nullable=True, unique=True)
-    social_type = db.Column(db.String, nullable=True)
-    first_name = db.Column(db.String)
-    last_name = db.Column(db.String)
-    email = db.Column(db.String, nullable=True)
 
 
 class Rules(db.Model):
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    rule = db.Column(db.String(140))
+    has = db.Column(db.String)
+    equals = db.Column(db.String)
+    begins_with = db.Column(db.String)
+    extension = db.Column(db.String)
+    regex = db.Column(db.String)
+    delete_file = db.Column(db.Boolean)
+    move_to = db.Column(db.String)
 
-
-def checkRule(fileString, name):
-    if name in fileString:
+    def matches_rule(self, filename, extension):
+        if self.has and self.has not in filename:
+            return False
+        if self.equals and self.equals != filename:
+            return False
+        if self.begins_with and not filename.startswith(self.begins_with):
+            return False
+        if self.extension and extension != self.extension:
+            return False
+        if self.regex and re.match(self.regex, filename + extension):
+            return False
         return True
-    else:
-        return False
+
+    def get_json(self):
+        return {
+            "id": self.id,
+            "has": self.has,
+            "equals": self.equals,
+            "begins_with": self.begins_with,
+            "extension": self.extension,
+            "delete_file": self.delete_file,
+            "move_to": self.move_to
+        }
 
 
 # m = len(str1) n = len(str2)
@@ -51,4 +65,3 @@ def removeExtension(fileNameString):
             last = i
             break
     return fileNameString[:len(fileNameString) - last - 1]
-
