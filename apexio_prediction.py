@@ -26,6 +26,7 @@ from tensorflow.keras.layers import Input, Dense, Add, Dropout, Concatenate
 from tensorflow.keras.models import Model
 from tensorflow.keras.models import load_model
 from models import InferSent
+from sklearn.cluster import KMeans
 import textract
 
 model = None
@@ -198,3 +199,29 @@ def make_predictions(dir_triples, file_paths, model):
 		#print(file_contents_non_null[i][0],':',dir_triples[argmax(predictions[i])][1])
 		recommendations.append((file_contents_non_null[i][0],dir_triples[argmax(predictions[i])][1]))
 	return recommendations
+
+def grab_file_names(path):
+	files = []
+	for r, d, f in os.walk(path):
+		for file in f:
+			files.append(os.path.join(r, file))
+	return files
+
+def K_means(n_clusters, big_dir):
+	files = grab_file_names(big_dir)
+	vecs = []
+	names = []
+	for f in files:
+		name = f.split(r'/'+big_dir+'/')[1]
+		print(name)
+		names.append(name)
+		vecs.append(get_doc2vec(name))
+	clf = KMeans(n_clusters=n_clusters,
+	          max_iter=1000,
+	          init='k-means++',
+	          n_init=1)
+	labels = clf.fit_predict(vecs)
+	sets = [[] for _ in range(n_clusters)]
+	for i in range(len(names)):
+		sets[labels[i]].append(names[i])
+	return sets
