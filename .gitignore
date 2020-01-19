@@ -7,3 +7,5 @@ node_modules/
 venv/
 .cache/
 *.map
+GloVe/
+infersent1.pkl

@@ -26,35 +26,11 @@ from tensorflow.keras.layers import Input, Dense, Add, Dropout, Concatenate
 from tensorflow.keras.models import Model
 from tensorflow.keras.models import load_model
 from models import InferSent
+import textract
 
-nltk.download('punkt')
+model = None
 
-# This is the big file so run this once to download to your drive
-#!mkdir 'drive/My Drive/ApexioData/GloVe'
-#!curl -Lo 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.zip' http://nlp.stanford.edu/data/glove.840B.300d.zip
-#!unzip 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.zip' -d 'drive/My Drive/ApexioData/GloVe/'
-
-# Run every time to download on the colab runtime
-#!mkdir encoder
-#!curl -Lo encoder/infersent1.pkl https://dl.fbaipublicfiles.com/infersent/infersent1.pkl
-
-# Load model
-
-model_version = 1
-MODEL_PATH = "encoder/infersent%s.pkl" % model_version
-params_model = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
-				'pool_type': 'max', 'dpout_model': 0.0, 'version': model_version}
-model = InferSent(params_model)
-model.load_state_dict(torch.load(MODEL_PATH))
-
-model = model.cuda()
-
-W2V_PATH = 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.txt'
-model.set_w2v_path(W2V_PATH)
-
-model.build_vocab_k_words(K=100000)
-
-def get_doc2vec(text):
+def get_doc2vec(text, model):
 	sents = nltk.sent_tokenize(text)
 	emb = model.encode(sents)
 	sum = None
@@ -106,24 +82,6 @@ def get_dirs(path):
 			dirs += d
 	return dirs
 
-def get_files(path, dirs):
-	tarr = []
-	vecs = []
-	for i in range(len(dirs)):
-		dir = dirs[i]
-		print(dir)
-		files = grab_files(path+dir+'/')
-		for f in files:
-			r = f.split(r'/'+dir+'/')[1]
-			ext = r.split(r'.')[1]
-			try:
-				extr = extract(f)
-				vecs.append(get_doc2vec(extr))
-				tarr.append([r, ext, extr, vecs[-1],dir])
-			except:
-				print(f'File {r} not readable')
-	return tarr
-
 def generate_quads(names, contents, dirs):
 	tarr = []
 	for i in range(len(names)):
@@ -154,20 +112,11 @@ def grab_files(path):
 			files.append(os.path.join(r, file))
 	return files
 
-def get_files(path, dir):
-	tarr = []
-	files = grab_files(path)
-	for f in files:
-		r = f.split(r'/'+dir+'/')[1]
-		ext = r.split(r'.')[1]
-		try:
-			extr = extract(f)
-			tarr.append([r, ext, extr, get_doc2vec(extr), dir])
-		except:
-			print(f'File {r} not readable')
-	return tarr
+def extract(file_path):
+    text = textract.process(file_path)
+    return text.decode('utf-8')
 
-def get_file(path):
+def get_file(path, model):
 	r = f.split(r'/'+dir+'/')[1]
 	ext = r.split(r'.')[1]
 	try:
@@ -177,41 +126,67 @@ def get_file(path):
 		return [path, 'NAN', 'NAN', None]
 	return None
 
-def main():
+# ('Path','id','Model_Location')
+def make_predictions(dir_triples, file_paths, model_1):
+
+	nltk.download('punkt')
+
+	# This is the big file so run this once to download to your drive
+	#!mkdir 'drive/My Drive/ApexioData/GloVe'
+	#!curl -Lo 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.zip' http://nlp.stanford.edu/data/glove.840B.300d.zip
+	#!unzip 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.zip' -d 'drive/My Drive/ApexioData/GloVe/'
+
+	# Run every time to download on the colab runtime
+	#!mkdir encoder
+	#!curl -Lo encoder/infersent1.pkl https://dl.fbaipublicfiles.com/infersent/infersent1.pkl
+
+	# Load model
+
+	#model_version = 1
+	#MODEL_PATH = "encoder/infersent%s.pkl" % model_version
+	#params_model = {'bsize': 64, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
+					#'pool_type': 'max', 'dpout_model': 0.0, 'version': model_version}
+	#model = InferSent(params_model)
+	#model.load_state_dict(torch.load(MODEL_PATH))
+
+	#model = model.cuda()
+
+	#W2V_PATH = 'drive/My Drive/ApexioData/GloVe/glove.840B.300d.txt'
+	#model.set_w2v_path(W2V_PATH)
+
+	#model.build_vocab_k_words(K=100000)
+
 	parser = argparse.ArgumentParser(description='Assignment 4')
 	parser.add_argument('-paths', dest="paths", action="store", help='Comma seperated list of file paths for predictions.', default='', required=True)
 
-	file_paths = parser.paths.split(',')
 	file_contents_non_null = []
 	file_contents_null = []
 	vecs = []
 	for path in file_paths:
-		cont = get_file(path)
+		cont = get_file(path, model)
 		if cont[3] == None:
 			file_contents_null.append(cont)
 		else:
 			file_contents_non_null.append(cont)
 			vecs.append(cont[3])
 
-	dir_triples = []
 	predictions = [[] for _ in len(file_contents_non_null)]
-	with open('automated_directory_settings.json') as json_file:
-		data = json.load(json_file)
-		for p in data:
-			try:
-				model = load_model(p['Model_Location'])
-				dir_triples.append((p['Path'],p['Name'],p['Model_Location']))
-				preds = model.predict(np.array(vecs))
-				for i in range(len(preds)):
-					predictions[i].append(preds[i][0])
-			except:
-				pass
+	for triple in dir_triples:
+		try:
+			model = load_model(triple[2])
+			preds = model.predict(np.array(vecs))
+			for i in range(len(preds)):
+				predictions[i].append(preds[i][0])
+		except:
+			for i in range(len(preds)):
+				predictions[i].append(-1)
 
 	recommendations = []
-	print('Recommendations')
+	#print('Recommendations')
 	for file in file_contents_null:
-		print(file[0], ': None')
-		recommendations.append((file[0], 'None'))
+		#print(file[0], ': None')
+		recommendations.append((file[0], None))
 	for i in range(len(file_contents_non_null)):
-		print(file_contents_non_null[i][0],':',dir_triples[argmax(predictions[i])][1])
+		#print(file_contents_non_null[i][0],':',dir_triples[argmax(predictions[i])][1])
 		recommendations.append((file_contents_non_null[i][0],dir_triples[argmax(predictions[i])][1]))
+	return recommendations
