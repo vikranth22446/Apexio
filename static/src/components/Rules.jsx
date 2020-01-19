@@ -1,19 +1,6 @@
 import React, {Component} from 'react';
 import Header from "./Header";
 
-class Rules extends Component {
-    render() {
-        return (
-            <div>
-                Rules:
-
-
-            </div>
-        );
-    }
-}
-
-
 import {makeStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -25,9 +12,12 @@ import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles({
     table: {
-        minWidth: 650,
+        marginLeft: '10px',
+        marginRight: '10px',
+        border: '5px solid transparent'
     },
 });
+
 
 function createData(name, calories, fat, carbs, protein) {
     return {name, calories, fat, carbs, protein};
@@ -41,7 +31,7 @@ const rows = [
     createData('Gingerbread', 356, 16.0, 49, 3.9),
 ];
 
-export default function DenseTable() {
+function DenseTable() {
     const classes = useStyles();
 
     return (
@@ -50,28 +40,70 @@ export default function DenseTable() {
                 <TableHead>
                     <TableRow>
                         <TableCell>Has</TableCell>
-                        <TableCell align="right">Equals</TableCell>
-                        <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                        <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                        <TableCell align="right">Protein&nbsp;(g)</TableCell>
+                        <TableCell>Equals</TableCell>
+                        <TableCell>Begins With</TableCell>
+                        <TableCell>Extension</TableCell>
+                        <TableCell>Regex</TableCell>
+                        <TableCell>Move to</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map(row => (
+                    {props.rows.map(row => (
                         <TableRow key={row.name}>
                             <TableCell component="th" scope="row">
                                 {row.name}
                             </TableCell>
-                            <TableCell align="right">{row.calories}</TableCell>
-                            <TableCell align="right">{row.fat}</TableCell>
-                            <TableCell align="right">{row.carbs}</TableCell>
-                            <TableCell align="right">{row.protein}</TableCell>
+                            <TableCell>{row.has}</TableCell>
+                            <TableCell>{row.equals}</TableCell>
+                            <TableCell> {row.begins_with}</TableCell>
+                            <TableCell>{row.extension}</TableCell>
+                            <TableCell>{row.regex}</TableCell>
+                            <TableCell>{row.moveTo}</TableCell>
+
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </TableContainer>
     );
+}
+
+
+class Rules extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            rows: []
+        }
+    }
+
+    componentDidMount() {
+
+        fetch('http://127.0.0.1:4242/get_all_rules').
+        then(response => response.json())
+            .then((jsonData) => {
+                // jsonData is parsed json object received from url
+                // console.log(jsonData);
+                this.setState({rows: jsonData['rows']})
+            })
+            .catch((error) => {
+                // handle your errors here
+                console.error(error)
+            })
+    }
+
+    render() {
+        return (
+            <div>
+                <Header/>
+                Rules:
+                <div style={{marginRight: "30px", marginLeft: "30px"}}>
+                    <DenseTable rows={this.state.rows}/>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default Rules;

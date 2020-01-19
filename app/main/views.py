@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify
 
 from app.main import main
-from app.models import Rules
+from app.models.user import Rules
 from app import db
 
 
@@ -17,7 +17,7 @@ def home(path=None):
     return render_template('index.html')
 
 
-@main.route("/create_rule", mode=["POST"])
+@main.route("/create_rule", methods=["POST"])
 def create_rule():
     """
     Catch all home view used to render the react code. This is rendered server side to allow
@@ -48,7 +48,7 @@ def create_rule():
     return jsonify({"status": 200}), 200
 
 
-@main.route("/get_all_rules", mode=["POST"])
+@main.route("/get_all_rules", methods=["POST"])
 def get_all_rules():
     """
     Catch all home view used to render the react code. This is rendered server side to allow
@@ -77,4 +77,3 @@ def get_all_rules():
     # db.session.commit()
     # return jsonify({"status": 200}), 200
     return jsonify({"rules": rules_dic})
-

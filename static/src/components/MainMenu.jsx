@@ -1,7 +1,14 @@
 import React, {Component} from 'react';
 import Header from "./Header";
+import {
+    withRouter
+} from 'react-router-dom'
 
 class MainMenu extends Component {
+    onRuleForwarding = () => {
+        this.props.history.push('/rules');
+    };
+
     render() {
         return (
             <div>
@@ -27,7 +34,7 @@ class MainMenu extends Component {
                     <div className={"third"}>
                         <img src={"/static/rule_forwarding.svg"} className={"menuMainIcon"}/>
                         <br/>
-                        <button className={"mainButtonStyle"}>
+                        <button className={"mainButtonStyle"} onClick={this.onRuleForwarding}>
                             Rule Forwarding&nbsp;&nbsp;
                             <i className="fa fa-arrow-right rightArrow"/>
                         </button>
@@ -53,4 +60,4 @@ class MainMenu extends Component {
     }
 }
 
-export default MainMenu;
+export default withRouter(MainMenu);
